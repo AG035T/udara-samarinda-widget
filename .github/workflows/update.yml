@@ -1,0 +1,33 @@
+name: Update BMKG PM2.5
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ambil data BMKG terbaru
+        run: python3 update_data.py
+
+      - name: Simpan data terbaru
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan data"
+          else
+            git commit -m "Update BMKG PM2.5"
+            git push
+          fi
