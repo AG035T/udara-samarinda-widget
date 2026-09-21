@@ -19,11 +19,11 @@ jobs:
       - name: Ambil data BMKG terbaru
         run: python3 update_data.py
 
-      - name: Simpan data terbaru
+      - name: Simpan data dan gambar terbaru
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json
+          git add data.json widget.svg widget-live.html
 
           if git diff --cached --quiet; then
             echo "Tidak ada perubahan data"
