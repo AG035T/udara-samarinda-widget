@@ -2,7 +2,8 @@ name: Update BMKG PM2.5
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+  - cron: "7,22,37,52 * * * *"
+    timezone: "Asia/Makassar"
   workflow_dispatch:
 
 permissions:
