@@ -1,51 +1,105 @@
-#!/usr/bin/env python3
-import json, re, urllib.request
+import json
+import re
+import urllib.request
 from html import unescape
 from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-URL="https://stamet-samarinda.bmkg.go.id/iklim/kualitas-udara"
-WITA=timezone(timedelta(hours=8))
+URL = "https://www.bmkg.go.id/kualitas-udara/pm25"
+
+WIB = timezone(timedelta(hours=7))
+WITA = timezone(timedelta(hours=8))
 
 class TextExtractor(HTMLParser):
     def __init__(self):
-        super().__init__(); self.parts=[]
-    def handle_data(self,data):
-        if data and data.strip(): self.parts.append(data.strip())
+        super().__init__()
+        self.parts = []
 
-req=urllib.request.Request(URL,headers={
-    "User-Agent":"Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/140 Safari/537.36",
-    "Accept":"text/html,application/xhtml+xml"
-})
-with urllib.request.urlopen(req,timeout=30) as r:
-    raw=r.read().decode("utf-8","replace")
+    def handle_data(self, data):
+        if data and data.strip():
+            self.parts.append(data.strip())
 
-p=TextExtractor(); p.feed(unescape(raw))
-text=re.sub(r"\s+"," "," ".join(p.parts))
+req = urllib.request.Request(
+    URL,
+    headers={
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html,application/xhtml+xml"
+    }
+)
 
-m_value=re.search(r"([0-9]+(?:[.,][0-9]+)?)\s*µg/m(?:³|3)",text,re.I)
-m_update=re.search(r"Update:\s*([^|]{0,80}?WITA)",text,re.I)
-m_trend=re.search(r"Tren:\s*(Meningkat|Menurun|Stabil)",text,re.I)
-if not m_value:
-    raise RuntimeError("Nilai PM2.5 tidak ditemukan")
+with urllib.request.urlopen(req, timeout=30) as r:
+    raw = r.read().decode("utf-8", "replace")
 
-value=float(m_value.group(1).replace(",","."))
+parser = TextExtractor()
+parser.feed(unescape(raw))
 
-def classify(v):
-    if v<=15.5:return "Baik"
-    if v<=55.4:return "Sedang"
-    if v<=150.4:return "Tidak Sehat"
-    if v<=250.4:return "Sangat Tidak Sehat"
-    return "Berbahaya"
+text = re.sub(r"\s+", " ", " ".join(parser.parts))
 
-payload={
-    "value":value,
-    "status":classify(value),
-    "trend":m_trend.group(1).title() if m_trend else "Stabil",
-    "updated":m_update.group(1).strip() if m_update else "—",
-    "checked":datetime.now(WITA).strftime("%d %b %Y · %H:%M WITA"),
-    "source":URL
+match = re.search(
+    r"Samarinda\s+([0-9]{1,2}\.[0-9]{2})\s+WIB"
+    r".{0,120}?PM.{0,30}?"
+    r"([0-9]+(?:[.,][0-9]+)?)"
+    r".{0,40}?"
+    r"(Sangat Tidak Sehat|Tidak Sehat|Berbahaya|Sedang|Baik)",
+    text,
+    re.I
+)
+
+if not match:
+    raise RuntimeError("Data Samarinda tidak ditemukan pada halaman BMKG")
+
+time_text = match.group(1)
+value = float(match.group(2).replace(",", "."))
+status = match.group(3).title()
+
+# Baca nilai sebelumnya untuk menentukan tren
+old_value = None
+try:
+    old = json.loads(Path("data.json").read_text(encoding="utf-8"))
+    old_value = float(old.get("value"))
+except Exception:
+    pass
+
+if old_value is None:
+    trend = "Stabil"
+elif value > old_value:
+    trend = "Meningkat"
+elif value < old_value:
+    trend = "Menurun"
+else:
+    trend = "Stabil"
+
+# Konversi waktu BMKG dari WIB ke WITA
+hour, minute = map(int, time_text.split("."))
+
+now_wib = datetime.now(WIB)
+measurement_wib = now_wib.replace(
+    hour=hour,
+    minute=minute,
+    second=0,
+    microsecond=0
+)
+
+# Tangani data sekitar pergantian hari
+if measurement_wib > now_wib + timedelta(hours=2):
+    measurement_wib -= timedelta(days=1)
+
+measurement_wita = measurement_wib.astimezone(WITA)
+checked_wita = datetime.now(WITA)
+
+payload = {
+    "value": value,
+    "status": status,
+    "trend": trend,
+    "updated": measurement_wita.strftime("%d %b %Y · %H:%M WITA"),
+    "checked": checked_wita.strftime("%d %b %Y · %H:%M WITA"),
+    "source": URL
 }
-Path("data.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
-print(json.dumps(payload,ensure_ascii=False))
+
+Path("data.json").write_text(
+    json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8"
+)
+
+print(json.dumps(payload, ensure_ascii=False))
