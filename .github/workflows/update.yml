@@ -1,8 +1,6 @@
 name: Update BMKG PM2.5
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
