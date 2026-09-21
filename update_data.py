@@ -5,6 +5,7 @@ from html import unescape, escape
 from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+import cairosvg
 
 SOURCE_URL = "https://www.bmkg.go.id/kualitas-udara/pm25"
 FETCH_URL = "https://r.jina.ai/https://www.bmkg.go.id/kualitas-udara/pm25"
@@ -162,7 +163,9 @@ Path("data.json").write_text(
     encoding="utf-8"
 )
 
-Path("widget.svg").write_text(make_svg(payload), encoding="utf-8")
+svg = make_svg(payload)
+Path("widget.svg").write_text(svg, encoding="utf-8")
+cairosvg.svg2png(bytestring=svg.encode("utf-8"), write_to="widget.png", output_width=320, output_height=320)
 
 stamp = checked_wita.strftime("%Y%m%d%H%M")
 viewer = f"""<!doctype html>
@@ -178,7 +181,7 @@ img{{display:block;width:320px;height:320px;border:0}}
 </style>
 </head>
 <body>
-<img id="card" src="widget.svg?v={stamp}" alt="Udara Samarinda">
+<img id="card" src="https://ag035t.github.io/udara-samarinda-widget/widget.png?v={stamp}" alt="Udara Samarinda">
 </body>
 </html>
 """
