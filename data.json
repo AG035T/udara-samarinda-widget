@@ -1,8 +1,8 @@
 {
-  "value": 33.4,
-  "status": "Sedang",
-  "trend": "Meningkat",
-  "updated": "20 Sep 2026 · 22:54 WITA",
-  "checked": "Data awal dari tampilan BMKG",
-  "source": "https://stamet-samarinda.bmkg.go.id/iklim/kualitas-udara"
+  "value": 2.5,
+  "status": "Tidak Sehat",
+  "trend": "Menurun",
+  "updated": "21 Sep 2026 · 06:00 WITA",
+  "checked": "21 Sep 2026 · 08:15 WITA",
+  "source": "https://r.jina.ai/https://www.bmkg.go.id/kualitas-udara/pm25"
 }
