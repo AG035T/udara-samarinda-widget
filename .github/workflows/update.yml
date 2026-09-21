@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Siapkan renderer PNG
+        run: python3 -m pip install --disable-pip-version-check cairosvg
+
       - name: Ambil data BMKG terbaru
         run: python3 update_data.py
 
@@ -23,7 +26,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json widget.svg widget-live.html
+          git add data.json widget.svg widget.png widget-live.html
 
           if git diff --cached --quiet; then
             echo "Tidak ada perubahan data"
