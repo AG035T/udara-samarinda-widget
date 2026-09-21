@@ -6,8 +6,7 @@ from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-URL = "https://www.bmkg.go.id/kualitas-udara/pm25"
-
+URL = "https://r.jina.ai/https://www.bmkg.go.id/kualitas-udara/pm25"
 WIB = timezone(timedelta(hours=7))
 WITA = timezone(timedelta(hours=8))
 
