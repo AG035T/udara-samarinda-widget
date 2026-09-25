@@ -1,8 +1,8 @@
 {
-  "value": 70.7,
-  "status": "Tidak Sehat",
-  "trend": "Stabil",
-  "updated": "25 Sep 2026 · 23:00 WITA",
-  "checked": "26 Sep 2026 · 02:15 WITA",
+  "value": 458.8,
+  "status": "Berbahaya",
+  "trend": "Meningkat",
+  "updated": "26 Sep 2026 · 01:00 WITA",
+  "checked": "26 Sep 2026 · 02:30 WITA",
   "source": "https://www.bmkg.go.id/kualitas-udara/pm25"
 }
