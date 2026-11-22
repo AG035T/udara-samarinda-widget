@@ -1,8 +1,8 @@
 {
-  "value": 9.2,
-  "status": "Baik",
-  "trend": "Stabil",
-  "updated": "22 Nov 2026 · 11:00 WITA",
-  "checked": "22 Nov 2026 · 14:00 WITA",
+  "value": 16.3,
+  "status": "Sedang",
+  "trend": "Meningkat",
+  "updated": "22 Nov 2026 · 14:00 WITA",
+  "checked": "22 Nov 2026 · 15:45 WITA",
   "source": "https://www.bmkg.go.id/kualitas-udara/pm25"
 }
